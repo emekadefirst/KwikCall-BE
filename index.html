@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hono + Bun + Ngrok Stream</title>
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .status-card { background: #1e293b; border: 1px solid #334155; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .video-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 900px; position: relative; }
+        video { width: 100%; background: #000; border-radius: 12px; border: 2px solid #334155; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        #localVideo { width: 200px; position: absolute; bottom: 15px; right: 15px; border: 2px solid #3b82f6; z-index: 10; }
+        .btn { background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin: 10px 0; }
+        .btn:hover { background: #2563eb; transform: translateY(-1px); }
+        .log-container { width: 100%; max-width: 600px; margin-top: 30px; padding: 15px; background: #000; border-radius: 8px; font-family: monospace; font-size: 12px; color: #94a3b8; height: 150px; overflow-y: auto; text-align: left; }
+        .accent { color: #3b82f6; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="status-card">
+        <div id="roleIndicator">Detecting Role...</div>
+        <div id="statusText" style="margin-top: 5px; font-size: 14px; color: #94a3b8;">Initializing WebSocket...</div>
+        <div id="streamerUI" style="display: none;">
+            <button class="btn" onclick="startBroadcasting()">🚀 Start Camera & Stream</button>
+        </div>
+    </div>
+
+    <div class="video-grid">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+
+    <div class="log-container" id="logger">
+        <div>> System Ready.</div>
+    </div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const isStreamer = params.get('mode') === 'streamer';
+    const roomId = params.get('room') || 'default';
+    
+    const statusText = document.getElementById('statusText');
+    const roleIndicator = document.getElementById('roleIndicator');
+    const logger = document.getElementById('logger');
+
+    // --- 1. SMART CONNECTION LOGIC ---
+    // If we are on HTTPS (Ngrok), we MUST use WSS. If on HTTP (Local), use WS.
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // If we are on Ngrok, host is the ngrok URL. If local, it's localhost:4000.
+    const host = window.location.host.includes('localhost') ? 'localhost:4000' : window.location.host;
+    const ws = new WebSocket(`${protocol}//${host}/ws/${roomId}`);
+
+    const addLog = (m) => {
+        logger.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${m}</div>`;
+        logger.scrollTop = logger.scrollHeight;
+    };
+
+    roleIndicator.innerHTML = `Room: <span class="accent">${roomId}</span> | Role: <span class="accent">${isStreamer ? 'STREAMER' : 'VIEWER'}</span>`;
+    if (isStreamer) document.getElementById('streamerUI').style.display = 'block';
+
+    // --- 2. WEBRTC SETUP ---
+    const pc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Helps find your public IP across the internet
+    });
+
+    async function startBroadcasting() {
+        addLog("Requesting camera access...");
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = stream;
+            stream.getTracks().forEach(track => pc.addTrack(track, stream));
+            
+            addLog("Camera active. Creating WebRTC Offer...");
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            ws.send(JSON.stringify({ type: 'offer', sdp: offer }));
+            statusText.innerText = "LIVE - Sending stream to viewers";
+        } catch (e) {
+            addLog("ERROR: " + e.message);
+            statusText.innerText = "Camera failed. Check permissions.";
+        }
+    }
+
+    // --- 3. SIGNALING HANDSHAKE ---
+    ws.onmessage = async (evt) => {
+        const data = JSON.parse(evt.data);
+        addLog(`Signal Received: ${data.type}`);
+
+        if (data.type === 'request_stream' && isStreamer) {
+            addLog("Viewer joined! Waiting for you to click Start.");
+            statusText.innerText = "Viewer detected! Click the blue button.";
+        }
+
+        if (data.type === 'offer' && !isStreamer) {
+            addLog("Streamer offer received. Connecting...");
+            await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            ws.send(JSON.stringify({ type: 'answer', sdp: answer }));
+        }
+
+        if (data.type === 'answer' && isStreamer) {
+            addLog("Viewer handshake complete!");
+            await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        }
+
+        if (data.type === 'candidate') {
+            pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(e => {});
+        }
+    };
+
+    ws.onopen = () => {
+        addLog(`Connected to Hono Server (${protocol})`);
+        statusText.innerText = isStreamer ? "Ready to stream." : "Waiting for streamer...";
+        
+        if (!isStreamer) {
+            addLog("Pinging streamer for stream request...");
+            ws.send(JSON.stringify({ type: 'request_stream' }));
+        }
+    };
+
+    // --- 4. NETWORK & TRACK EVENTS ---
+    pc.onicecandidate = (e) => {
+        if (e.candidate) ws.send(JSON.stringify({ type: 'candidate', candidate: e.candidate }));
+    };
+
+    pc.ontrack = (e) => {
+        addLog("SUCCESS: Remote video received!");
+        document.getElementById('remoteVideo').srcObject = e.streams[0];
+        statusText.innerText = "CONNECTED - Streaming Live";
+    };
+</script>
+</body>
+</html>
