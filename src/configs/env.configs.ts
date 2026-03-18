@@ -27,7 +27,8 @@ export const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://happyfit:happyfi
 
 export const FIREBASE_SECRET_PATH = path.resolve(process.cwd(), './firebase.json');
 
-export const DBURL = `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}`;
+// Use encodeURIComponent to safely handle the '@' in your password
+export const DBURL = `postgresql://${DB_USER}:${encodeURIComponent(DB_PASSWORD!)}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}${DB_PORT === '6543' ? '?sslmode=require' : ''}`;
 
 export const LIVEKIT_HOST = process.env.LIVEKIT_HOST || process.env.LIVEKIT_URL;
 export const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY;

@@ -1,17 +1,22 @@
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { db, client } from "./db.core";
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { DBURL } from "../configs/env.configs";
 
 async function runMigration() {
+  // We create a fresh client JUST for the migration with max: 1
+  const migrationClient = postgres(DBURL!, { prepare: false, max: 1 });
+  const migrationDb = drizzle(migrationClient);
+
   console.log("⏳ Running migrations...");
-  
   try {
-    await migrate(db, { migrationsFolder: "./drizzle" });
-    console.log("Migrations completed successfully!");
+    await migrate(migrationDb, { migrationsFolder: "./drizzle" });
+    console.log("✅ Migrations completed successfully!");
   } catch (error) {
-    console.error("Migration failed:", error);
+    console.error("❌ Migration failed:", error);
     process.exit(1); 
   } finally {
-    await client.end();
+    await migrationClient.end();
   }
 }
 

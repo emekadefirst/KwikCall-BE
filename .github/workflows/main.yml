@@ -1,0 +1,57 @@
+name: Deploy to Cloudflare
+on:
+  push:
+    branches:
+      - main # Deployment triggers only when you push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Cloudflare will encrypt these keys as "Secrets"
+          secrets: |
+            DB_HOST
+            DB_USER
+            DB_PASSWORD
+            LIVEKIT_URL
+            LIVEKIT_API_KEY
+            LIVEKIT_API_SECRET
+            JWT_SECRET_KEY
+            JWT_REFRESH_SECRET
+        env:
+          # Database Secrets
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: "6543"
+          DB_DATABASE: "postgres"
+          DB_SSL: "true"
+          
+          # LiveKit Secrets
+          LIVEKIT_URL: ${{ secrets.LIVEKIT_URL }}
+          LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
+          LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+          
+          # Auth Secrets
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
+          JWT_ACCESS_EXPIRY: "15"
+          JWT_REFRESH_EXPIRY: "7"
+          JWT_ALGORITHM: "HS256"
