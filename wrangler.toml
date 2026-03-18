@@ -3,3 +3,6 @@ name = 'kwikcall-backend'
 main = "index.ts"
 compatibility_date = "2026-03-18"
 compatibility_flags = [ "nodejs_compat" ] 
+
+[observability]
+enabled = true
