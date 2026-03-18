@@ -1,5 +1,5 @@
 
 name = 'kwikcall-backend'
-main = "./index.ts"
+main = "./dist/index.js"
 compatibility_date = "2024-01-01"
 compatibility_flags = [ "nodejs_compat" ] # Added this for your DB driver!
