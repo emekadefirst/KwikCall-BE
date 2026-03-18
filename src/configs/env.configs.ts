@@ -15,6 +15,15 @@ const configProxy = new Proxy({}, {
   }
 }) as any;
 
+const getVar = (key: string, fallback: string = ''): string => {
+  // 1. Check Cloudflare (Production)
+  if (_cf_env?.[key]) return _cf_env[key];
+  // 2. Check Bun/Node (Local terminal/CLI)
+  if (process.env[key]) return process.env[key];
+  // 3. Use default
+  return fallback;
+};
+
 // Explicit exports so TypeScript doesn't complain
 export const DB_HOST = configProxy.DB_HOST;
 export const DB_PORT = configProxy.DB_PORT || '6543';
@@ -38,12 +47,13 @@ export const CLOUDINARY_API_SECRET = configProxy.CLOUDINARY_API_SECRET;
 
 // The DBURL must be calculated dynamically via a function to avoid the "Invalid URL" crash
 export const getDBURL = () => {
-  const host = configProxy.DB_HOST;
-  const user = configProxy.DB_USER;
-  const pass = encodeURIComponent(configProxy.DB_PASSWORD || '');
-  const port = configProxy.DB_PORT || '6543';
-  const db = configProxy.DB_DATABASE || 'postgres';
+  const user = getVar('DB_USER');
+  const pass = encodeURIComponent(getVar('DB_PASSWORD'));
+  const host = getVar('DB_HOST');
+  const port = getVar('DB_PORT', '6543');
+  const db = getVar('DB_DATABASE', 'postgres');
 
   if (!host || !user) return ""; 
+
   return `postgresql://${user}:${pass}@${host}:${port}/${db}${port === '6543' ? '?sslmode=require' : ''}`;
 };
