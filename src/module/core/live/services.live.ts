@@ -1,10 +1,10 @@
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 import { EventRepository } from '../event/repository.event';
-import { LIVEKIT_HOST, LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from '../../../configs/env.configs';
+import { LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from '../../../configs/env.configs';
 
 export class LiveService {
   private eventRepo = new EventRepository();
-  private roomService = new RoomServiceClient(LIVEKIT_HOST!, LIVEKIT_API_KEY!, LIVEKIT_API_SECRET!);
+  private roomService = new RoomServiceClient(LIVEKIT_URL!, LIVEKIT_API_KEY!, LIVEKIT_API_SECRET!);
 
   async startSession(shortCode: string, hostId: string) {
     const event = await this.eventRepo.findOne(shortCode, hostId);
@@ -27,7 +27,7 @@ export class LiveService {
       canSubscribe: true 
     });
 
-    return { token: await at.toJwt(), serverUrl: LIVEKIT_HOST };
+    return { token: await at.toJwt(), serverUrl: LIVEKIT_URL };
   }
 
   async joinSession(shortCode: string, userId: string) {
@@ -45,7 +45,7 @@ export class LiveService {
       canSubscribe: true 
     });
 
-    return { token: await at.toJwt(), serverUrl: LIVEKIT_HOST };
+    return { token: await at.toJwt(), serverUrl: LIVEKIT_URL };
   }
 
   async endSession(shortCode: string, hostId: string) {

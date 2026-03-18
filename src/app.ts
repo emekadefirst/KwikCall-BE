@@ -1,7 +1,7 @@
 import { cors } from 'hono/cors';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi'
-
+import { setGlobalEnv } from './configs/env.configs';
 import eventController from './module/core/event/controller.event';
 import fileController from './module/core/file/controller.file';
 import { userController, authController } from './module/core/user/controller.user';
@@ -11,6 +11,13 @@ export const app = new OpenAPIHono()
 
 
 app.get('/', (c) => c.text('Hello Bun!'));
+
+app.use('*', async (c, next) => {
+  if (c.env) {
+    setGlobalEnv(c.env);
+  }
+  await next();
+});
 
 // --- CORS Configuration ---
 const trustedOrigins = [

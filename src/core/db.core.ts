@@ -1,9 +1,9 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { DBURL } from "../configs/env.configs";
+import { getDBURL } from "../configs/env.configs";
 import * as schema from "./models.core";
 
-export const client = postgres(DBURL(), {
+export const client = postgres(getDBURL(), {
     prepare: false,
     max: 15,
     idle_timeout: 30,
