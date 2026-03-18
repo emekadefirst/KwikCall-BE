@@ -3,7 +3,7 @@ import postgres from "postgres";
 import { DBURL } from "../configs/env.configs";
 import * as schema from "./models.core";
 
-export const client = postgres(DBURL!, {
+export const client = postgres(DBURL(), {
     prepare: false,
     max: 15,
     idle_timeout: 30,

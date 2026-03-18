@@ -48,12 +48,6 @@ const getVal = (key: string, fallback?: string): string => {
 };
 
 // --- Explicit Exports for TypeScript ---
-// These are now real exports that VS Code can find.
-export const DB_HOST = getVal('DB_HOST');
-export const DB_PORT = getVal('DB_PORT');
-export const DB_USER = getVal('DB_USER');
-export const DB_PASSWORD = getVal('DB_PASSWORD');
-export const DB_DATABASE = getVal('DB_DATABASE');
 
 export const JWT_SECRET_KEY = getVal('JWT_SECRET_KEY');
 export const JWT_REFRESH_SECRET = getVal('JWT_REFRESH_SECRET');
@@ -79,4 +73,17 @@ export const SMTP_USER = getVal('SMTP_USER');
 export const SMTP_PASSWORD = getVal('SMTP_PASSWORD');
 
 // Calculated variable
-export const DBURL = `postgresql://${DB_USER}:${encodeURIComponent(DB_PASSWORD)}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}${DB_PORT === '6543' ? '?sslmode=require' : ''}`;
+// 1. Keep your existing individual exports above this line...
+
+// 2. Replace your existing DBURL export with this "Getter"
+export const DBURL = () => {
+  const host = getVal('DB_HOST');
+  const user = getVal('DB_USER');
+  const pass = encodeURIComponent(getVal('DB_PASSWORD'));
+  const port = getVal('DB_PORT', '6543');
+  const db = getVal('DB_DATABASE', 'postgres');
+
+  if (!host || !user) return ""; // Prevents "Invalid URL" crash
+
+  return `postgresql://${user}:${pass}@${host}:${port}/${db}${port === '6543' ? '?sslmode=require' : ''}`;
+};

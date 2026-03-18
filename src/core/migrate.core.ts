@@ -5,7 +5,7 @@ import { DBURL } from "../configs/env.configs";
 
 async function runMigration() {
   // We create a fresh client JUST for the migration with max: 1
-  const migrationClient = postgres(DBURL!, { prepare: false, max: 1 });
+  const migrationClient = postgres(DBURL(), { prepare: false, max: 1 });
   const migrationDb = drizzle(migrationClient);
 
   console.log("⏳ Running migrations...");
