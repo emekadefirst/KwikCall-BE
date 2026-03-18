@@ -2,18 +2,16 @@ import { sign, verify } from 'hono/jwt';
 import { db } from '../core/db.core';
 import { User } from '../module/core/user/models.user';
 import { eq } from 'drizzle-orm';
+import * as config from '../configs/env.configs';
 
 type Algorithm = 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512' | 'PS256' | 'PS384' | 'PS512' | 'ES256' | 'ES384' | 'ES512' | 'EdDSA';
 
 export class JwtService {
-  private static JWT_SECRET = Bun.env.JWT_SECRET_KEY!;
-  private static JWT_REFRESH_SECRET = Bun.env.JWT_REFRESH_SECRET!;
-
-
-  private static ALGORITHM = (Bun.env.JWT_ALGORITHM || 'HS256') as Algorithm;
-
-  private static ACCESS_EXP = Number(Bun.env.JWT_ACCESS_EXPIRY || 15); 
-  private static REFRESH_EXP = Number(Bun.env.JWT_REFRESH_EXPIRY || 7); 
+ private static get JWT_SECRET() { return config.JWT_SECRET_KEY; }
+  private static get JWT_REFRESH_SECRET() { return config.JWT_REFRESH_SECRET; }
+  private static get ALGORITHM() { return (config.JWT_ALGORITHM || 'HS256') as Algorithm; }
+  private static get ACCESS_EXP() { return Number(config.JWT_ACCESS_EXPIRY || 15); }
+  private static get REFRESH_EXP() { return Number(config.JWT_REFRESH_EXPIRY || 7); }
 
   static async generateTokens(userId: string) {
     const now = Math.floor(Date.now() / 1000);
