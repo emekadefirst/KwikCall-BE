@@ -1,14 +1,14 @@
 import { cors } from 'hono/cors';
 import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi'
-import { createBunWebSocket } from 'hono/bun'
+
 import eventController from './module/core/event/controller.event';
 import fileController from './module/core/file/controller.file';
 import { userController, authController } from './module/core/user/controller.user';
 import liveController from './module/core/live/controller.live';
 
 export const app = new OpenAPIHono()
-export const { upgradeWebSocket, websocket } = createBunWebSocket()
+
 
 app.get('/', (c) => c.text('Hello Bun!'));
 
