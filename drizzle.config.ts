@@ -1,5 +1,5 @@
 import { defineConfig } from "drizzle-kit";
-import { DBURL } from "./src/configs/env.configs";
+import { getDBURL } from "./src/configs/env.configs";
 
 
 export default defineConfig({
@@ -7,7 +7,7 @@ export default defineConfig({
   schema: "./src/core/models.core.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: DBURL!,
+    url: getDBURL(),
 
   },
   verbose: true,
