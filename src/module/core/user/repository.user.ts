@@ -18,37 +18,20 @@ export class UserRepository {
     }
 
     // internal query
-    async findUser(params: UserQueryParamsDTO) { // Fixed parameter name
+    async findUser(id?: string, email?: string, phoneNumber?: string) { 
         try {
-            const { id, role, search, page = 1, pageSize = 10, isActive, isVerified, email } = params;
-            const offset = (page - 1) * pageSize;
 
             const filters = [];
             if (id) filters.push(eq(User.id, id));
-            if (isActive !== undefined) filters.push(eq(User.isActive, isActive));
-            if (isVerified !== undefined) filters.push(eq(User.isVerified, isVerified));
+            if (phoneNumber !== undefined) filters.push(eq(User.phoneNumber, phoneNumber));
             if (email) filters.push(eq(User.email, email));
-            if (role !== undefined) filters.push(eq(User.role, role))
-
-            if (search) {
-                filters.push(or(
-                    ilike(User.firstName, `%${search}%`),
-                    ilike(User.lastName, `%${search}%`),
-                    ilike(User.email, `%${search}%`),
-                    ilike(User.phoneNumber, `%${search}%`),
-                    ilike(User.role, `%${search}%`)
-                ));
-            }
 
             const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
-            const users = await db.select()
+            const user = await db.select()
                 .from(User)
                 .where(whereClause)
-                .limit(pageSize)
-                .offset(offset);
-
-            return users;
+            return user;
         } catch (error) {
             console.error(`Database Error:`, error); // console.error is better for errors
             throw new Error("Failed to fetch users. Check server logs.");

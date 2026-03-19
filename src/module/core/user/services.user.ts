@@ -1,6 +1,7 @@
 import { UserRepository } from "./repository.user";
 import { logger } from "../../../logger/log.logger";
 import { PasswordManager } from "../../../auth/password.auth";
+import { HTTPException } from "hono/http-exception";
 import type {
     UserQueryParamsDTO,
     CreateUserDTO,
@@ -15,56 +16,55 @@ type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
 export class UserService {
     private userRepository: UserRepository;
+    private password: PasswordManager;
+
 
     constructor() {
         this.userRepository = new UserRepository();
+        this.password = new PasswordManager()
     }
 
-    async login(data: LoginDTO) {
-        try {
-            const user = await this.userRepository.findUser({ email: data.email, page: 1, pageSize: 1 });
-            if (!user) {
-                throw new Error("User not found");
-            } else{
-                const passwordManager = new PasswordManager();
-                if (!user[0]) {
-                    throw new Error("User not found");
-                }
-                const isValid = await passwordManager.verify(data.password, user[0].password);
-                if (!isValid) {
-                    throw new Error("Invalid password");
-                } else {
-                    return user[0];
-                }
-            }
-            // Here you would typically verify the password
-            return user;
-        } catch (error) {
-            logger.error(error, "Service Error: login failed");
-            throw error;
-        }
-    }
     async createUser(data: CreateUserDTO): Promise<void> {
         try {
             logger.info({ email: data.email }, "Service: Creating new user");
 
-            const existing = await this.userRepository.findUser({ email: data.email, page: 1, pageSize: 1 });
-            if (existing && existing.length > 0) {
-                throw new Error("User with this email already exists");
+            // 1. VALIDATION: This check "narrows" the type. 
+            // After this block, TypeScript knows data.password MUST be a string.
+            if (!data.password) {
+                throw new HTTPException(400, { message: "Password is required" });
             }
 
-            const passwordManager = new PasswordManager();
-            data.password = await passwordManager.hash(data.password);
+            // 2. Check for existing user (findUser returns an array)
+            const [existing] = await this.userRepository.findUser(undefined, data.email);
+            if (existing) {
+                throw new HTTPException(409, { message: "User with this email already exists" });
+            }
 
-            await this.userRepository.create(data);
+            // 3. Hash the password (TypeScript error is now gone)
+            const hashedPassword = await this.password.hash(data.password);
 
+            // 4. Create the user object
+            const userData = {
+                ...data,
+                password: hashedPassword,
+            };
+
+            await this.userRepository.create(userData);
+
+            // 5. Side effects
             const subscriberService = new SubscriberService();
             await subscriberService.createSubscriber({ email: data.email });
 
-            return; // Returns undefined/void
+            return;
         } catch (error) {
+            // Rethrow HTTPErrors so Hono catches the specific status code (400, 409, etc)
+            if (error instanceof HTTPException) {
+                throw error;
+            }
+
             logger.error(error, "Service Error: createUser failed");
-            throw error;
+            // Wrap unexpected errors in a 500
+            throw new HTTPException(500, { message: "Internal Server Error" });
         }
     }
 

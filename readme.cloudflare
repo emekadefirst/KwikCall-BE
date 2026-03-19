@@ -1,0 +1,4 @@
+name = KwikCallVPC
+
+Docker 
+docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token eyJhIjoiZGRhNTgwNmQwYjVkZDQ1NDE0YmM1MzNlOGJiMzc3OTYiLCJ0IjoiNmEyZTdhYzItNDZlOC00ZDA5LWJhMzItN2U2NWQwZTdjMzE3IiwicyI6IlpqWXhZelUxTm1FdE5qazVNeTAwT0RrMExUa3pNMkl0TnpKbVlXTTRNR1EyWWpJeSJ9

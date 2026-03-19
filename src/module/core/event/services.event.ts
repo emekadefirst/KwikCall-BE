@@ -1,12 +1,12 @@
 import { EventRepository } from "./repository.event";
 import { HTTPException } from 'hono/http-exception';
 import slugify from "slugify";
-import type { 
-    EventQueryParams, 
-    CreateEventInput, 
-    UpdateEventInput, 
+import type {
+    EventQueryParams,
+    CreateEventInput,
+    UpdateEventInput,
     EventPaginatedResponse,
-    EventObject 
+    EventObject
 } from "./dto.event";
 
 export class EventService {
@@ -36,16 +36,12 @@ export class EventService {
         const event = await this.repo.create(finalData);
         if (!event) throw new HTTPException(500, { message: "Failed to create event" });
         return event as EventObject;
-       
+
     }
 
     async update(id: string, userId: string, data: UpdateEventInput): Promise<EventObject> {
         // Fix for Error 3 & 5: Pass required pagination defaults to findOne
-        const existing = await this.repo.findOne({ 
-            id, 
-            page: 1, 
-            pageSize: 1 
-        });
+        const existing = await this.repo.findOne(id);
 
         if (!existing) {
             throw new HTTPException(404, { message: "Event not found" });
@@ -57,16 +53,12 @@ export class EventService {
 
         const updated = await this.repo.update(id, data);
         if (!updated) throw new HTTPException(500, { message: "Update failed" });
-        
+
         return updated as EventObject;
     }
 
     async delete(id: string, userId: string): Promise<boolean> {
-        const existing = await this.repo.findOne({ 
-            id, 
-            page: 1, 
-            pageSize: 1 
-        });
+        const existing = await this.repo.findOne(id);
 
         if (!existing) {
             throw new HTTPException(404, { message: "Event not found" });

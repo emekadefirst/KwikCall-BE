@@ -4,8 +4,9 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import { setGlobalEnv } from './configs/env.configs';
 import eventController from './module/core/event/controller.event';
 import fileController from './module/core/file/controller.file';
-import { userController, authController } from './module/core/user/controller.user';
+import { userController } from './module/core/user/controller.user';
 import liveController from './module/core/live/controller.live';
+import authController from './module/core/auth/controllers.auth';
 
 export const app = new OpenAPIHono()
 
@@ -54,14 +55,11 @@ app.doc('/doc', {
   info: { title: 'KwikCall API', version: '1.0.0' },
 });
 
-
-app.route('v1/events', eventController)
-app.route('v1/files', fileController)
+app.route("v1/auth", authController)
 app.route('v1/users', userController)
-app.route('v1/auth', authController)
+app.route('v1/events', eventController)
 app.route('v1/live', liveController)
-
-
+app.route('v1/files', fileController)
 app.get('/docs', swaggerUI({ url: '/doc' }));
 
 
