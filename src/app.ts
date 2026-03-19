@@ -14,9 +14,7 @@ export const app = new OpenAPIHono()
 app.get('/', (c) => c.text('Hello Bun!'));
 
 app.use('*', async (c, next) => {
-  if (c.env) {
-    setGlobalEnv(c.env);
-  }
+  setGlobalEnv(c.env);
   await next();
 });
 
