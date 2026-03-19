@@ -40,6 +40,6 @@
     "generate": "bun drizzle-kit generate",
     "migrate": "bun ./src/core/migrate.core.ts",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main"
+    "start": "node dist/index.js"
   }
 }
