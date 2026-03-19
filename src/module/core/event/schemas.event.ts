@@ -58,6 +58,7 @@ export const CreateEventSchema = createInsertSchema(Event).omit({
     createdAt: true,
     updatedAt: true,
 }).partial({
+    hostId: true,   
     description: true,
     startTime: true,
     endTime: true,
@@ -71,10 +72,10 @@ export const UpdateEventSchema = createSelectSchema(Event).omit({
     id: true,
     shortCode: true,
     slug: true,
-    hostId: true,
     createdAt: true,
     updatedAt: true,
 }).partial({
+    hostId: true, 
     title: true,
     description: true,
     type: true,

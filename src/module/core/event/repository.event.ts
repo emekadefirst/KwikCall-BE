@@ -33,7 +33,7 @@ export class EventRepository {
         return validFilters.length > 0 ? and(...validFilters) : undefined;
     }
 
-    async create(data: CreateEventInput & { shortCode?: string }) {
+    async create(data: CreateEventInput & { shortCode?: string, hostId: string, slug: string }) {
         try {
             const eventData = {
                 ...data,
