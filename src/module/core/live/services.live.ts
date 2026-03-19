@@ -4,57 +4,74 @@ import { LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from '../../../confi
 
 export class LiveService {
   private eventRepo = new EventRepository();
-  private roomService = new RoomServiceClient(LIVEKIT_URL!, LIVEKIT_API_KEY!, LIVEKIT_API_SECRET!);
+
+  // FIX: Execute the functions with ()
+  private roomService = new RoomServiceClient(
+    LIVEKIT_URL(),
+    LIVEKIT_API_KEY(),
+    LIVEKIT_API_SECRET()
+  );
 
   async startSession(shortCode: string, hostId: string) {
-    const event = await this.eventRepo.findOne(shortCode, hostId);
+    const event = await this.eventRepo.findOne({
+      shortCode: shortCode,
+      hostId: hostId
+    });
     if (!event) throw new Error("Unauthorized or Event not found");
 
-    await this.eventRepo.update(event.id, { 
-      status: 'LIVE', 
-      actualStartedAt: new Date() 
+    await this.eventRepo.update(event.id, {
+      status: 'LIVE',
+      actualStartedAt: new Date()
     });
 
-    const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+    // FIX: Execute config functions here too
+    const at = new AccessToken(LIVEKIT_API_KEY(), LIVEKIT_API_SECRET(), {
       identity: hostId,
       name: event.title,
     });
 
-    at.addGrant({ 
-      roomJoin: true, 
-      room: event.id, 
-      canPublish: true, 
-      canSubscribe: true 
+    at.addGrant({
+      roomJoin: true,
+      room: event.id,
+      canPublish: true,
+      canSubscribe: true
     });
 
-    return { token: await at.toJwt(), serverUrl: LIVEKIT_URL };
+    // FIX: Return the result of the function call
+    return { token: await at.toJwt(), serverUrl: LIVEKIT_URL() };
   }
 
   async joinSession(shortCode: string, userId: string) {
-    const event = await this.eventRepo.findOne(shortCode);
+    const event = await this.eventRepo.findOne({
+      shortCode: shortCode
+    });
     if (!event) throw new Error("Stream is not live");
 
-    const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+    // FIX: Execute config functions
+    const at = new AccessToken(LIVEKIT_API_KEY(), LIVEKIT_API_SECRET(), {
       identity: userId,
     });
 
-    at.addGrant({ 
-      roomJoin: true, 
-      room: event.id, 
-      canPublish: false, 
-      canSubscribe: true 
+    at.addGrant({
+      roomJoin: true,
+      room: event.id,
+      canPublish: false,
+      canSubscribe: true
     });
 
-    return { token: await at.toJwt(), serverUrl: LIVEKIT_URL };
+    return { token: await at.toJwt(), serverUrl: LIVEKIT_URL() };
   }
 
   async endSession(shortCode: string, hostId: string) {
-    const event = await this.eventRepo.findOne( shortCode, hostId );
+    const event = await this.eventRepo.findOne({
+      shortCode: shortCode,
+      hostId: hostId
+    });
     if (!event) throw new Error("Unauthorized: You are not the host");
 
-    await this.eventRepo.update(event.id, { 
-      status: 'ENDED', 
-      endTime: new Date() 
+    await this.eventRepo.update(event.id, {
+      status: 'ENDED',
+      endTime: new Date()
     });
 
     // Clean up the SFU room

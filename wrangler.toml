@@ -28,7 +28,7 @@ SMTP_PASSWORD = "26V6imocs&"
 
 # Database (Supabase)
 DB_HOST = "aws-1-eu-central-1.pooler.supabase.com"
-DB_PORT = "6543"
+DB_PORT = 5432
 DB_DATABASE = "postgres"
 DB_USER = "postgres.momkjmjdcrohqonwqdtf"
 DB_PASSWORD = "kwikcallDB26@"

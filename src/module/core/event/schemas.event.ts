@@ -50,7 +50,12 @@ export const EventQueryParamsSchema = z.object({
     }),
 }).openapi('EventQueryParams');
 
-export const CreateEventSchema = createInsertSchema(Event).omit({
+export const CreateEventSchema = createInsertSchema(Event, {
+    // Override the auto-generated z.date() with z.coerce.date()
+    startTime: z.coerce.date(),
+    endTime: z.coerce.date(),
+    actualStartedAt: z.coerce.date(),
+}).omit({
     id: true,
     shortCode: true,
     slug: true,
@@ -66,28 +71,20 @@ export const CreateEventSchema = createInsertSchema(Event).omit({
     recurrenceRule: true,
     isRecordingEnabled: true,
     requiresApproval: true
-})
+});
 
-export const UpdateEventSchema = createSelectSchema(Event).omit({
+export const UpdateEventSchema = createSelectSchema(Event, {
+    // Apply the same coercion here for updates
+    startTime: z.coerce.date(),
+    endTime: z.coerce.date(),
+    actualStartedAt: z.coerce.date(),
+}).omit({
     id: true,
     shortCode: true,
     slug: true,
     createdAt: true,
     updatedAt: true,
-}).partial({
-    hostId: true, 
-    title: true,
-    description: true,
-    type: true,
-    status: true,
-    startTime: true,
-    endTime: true,
-    inviteesEmail: true,
-    actualStartedAt: true,
-    recurrenceRule: true,
-    isRecordingEnabled: true,
-    requiresApproval: true
-})
+}).partial(); // .partial() without args makes all fields optional
 
 
 

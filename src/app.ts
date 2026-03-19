@@ -23,6 +23,7 @@ const trustedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5500',
+  'https://5e10-102-90-96-171.ngrok-free.app'
 ];
 
 interface CorsOptions {

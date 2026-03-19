@@ -81,9 +81,16 @@ export class EventRepository {
         }
     }
 
-    async findOne(id?: string, shortCode?: string, hostId?: string) {
-        const whereClause = this.buildFilters({ id, shortCode, hostId } as any);
+    async findOne(filters: { id?: string; shortCode?: string; hostId?: string }) {
+        // We "fake" the mandatory pagination fields to satisfy the Type
+        const whereClause = this.buildFilters({
+            ...filters,
+            page: 1,      // Satisfies the 'compulsory' requirement
+            pageSize: 1   // Satisfies the 'compulsory' requirement
+        });
+
         if (!whereClause) return null;
+
         const [event] = await db
             .select()
             .from(Event)
