@@ -1,10 +1,8 @@
-import { pgTable, pgEnum, pgSchema, uuid, varchar, timestamp, jsonb, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, uuid, varchar, timestamp, jsonb, boolean, index } from "drizzle-orm/pg-core";
 
 export const userRole = pgEnum("user_role", ["user", "admin", "moderator"]);
 
-export const publicSchema = pgSchema("public");
-
-export const User = publicSchema.table("users", {
+export const User = pgTable("accounts", {
     id: uuid("id").primaryKey().defaultRandom(),
     email: varchar("email", { length: 255 }).notNull().unique(),
     firstName: varchar("first_name", { length: 255 }).notNull(),
@@ -15,7 +13,7 @@ export const User = publicSchema.table("users", {
     isActive: boolean("is_active").default(true),
     isVerified: boolean("is_verified").default(false),
     lastLogin: timestamp("last_login"),
-    deviceTokens: jsonb("device_tokens").default("[]"),
+    deviceTokens: jsonb("device_tokens").default([]),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => {

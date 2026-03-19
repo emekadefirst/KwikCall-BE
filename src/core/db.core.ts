@@ -34,16 +34,14 @@ const initDb = () => {
     prepare: false,
     max: 1, // Keep this at 1 for Cloudflare Workers to prevent connection exhaustion
     idle_timeout: 30,
+    ssl: "require",
     connect_timeout: 20,
   });
 
   return drizzle(client, { schema });
 };
 
-/**
- * We export a Proxy that behaves exactly like the Drizzle 'db' object.
- * It stays idle until you call a method like .insert, .select, etc.
- */
+
 export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
   get(target, prop, receiver) {
     // If the instance hasn't been created yet, create it now

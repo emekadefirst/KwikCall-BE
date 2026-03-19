@@ -55,5 +55,6 @@ export const getDBURL = () => {
 
   if (!host || !user) return ""; 
 
-  return `postgresql://${user}:${pass}@${host}:${port}/${db}${port === '6543' ? '?sslmode=require' : ''}`;
+  // Force the search_path to 'public' so it finds YOUR users table first
+  return `postgresql://${user}:${pass}@${host}:${port}/${db}?sslmode=require&options=-c%20search_path%3Dpublic`;
 };

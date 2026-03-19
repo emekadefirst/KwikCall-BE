@@ -1,0 +1,1 @@
+ALTER TABLE "users" ALTER COLUMN "device_tokens" SET DEFAULT '[]'::jsonb;
