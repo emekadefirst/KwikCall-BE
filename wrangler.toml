@@ -1,8 +1,38 @@
-
-name = 'kwikcall-backend'
+name = "kwikcall-backend"
 main = "index.ts"
 compatibility_date = "2026-03-18"
 compatibility_flags = [ "nodejs_compat" ] 
 
 [observability]
 enabled = true
+
+[vars]
+# Server & Auth
+PORT = "3000"
+JWT_ACCESS_EXPIRY = "15"
+JWT_REFRESH_EXPIRY = "7"
+JWT_ALGORITHM = "HS256"
+JWT_SECRET_KEY = "cdc1jSdusIWZ1Ld9XFmpp38JkfKWu1t12/zY64QwYRZDG4VkG9YlL1+Drbo3Kz6Tp+rIubdBn0Ai123zqAHGJU"
+JWT_REFRESH_SECRET = "2b1jSdusIWZ1Ld9XFmpp38JkfKWu1t12/uY64QwYRZDG4VkG9YlL1+Drbo3Kz6Tp+rIubdBn0Ai123zqAHGJU"
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME = "dcmcezlkd"
+CLOUDINARY_API_KEY = "893459141475722"
+CLOUDINARY_API_SECRET = "VJrlZyxIFM9tDj8KhcL7mgac2zc"
+
+# SMTP / Email
+SMTP_HOST = "smtppro.zoho.com"
+SMTP_PORT = "465"
+SMTP_USER = "noreply@partcentral.com"
+SMTP_PASSWORD = "26V6imocs&"
+
+# Database (Supabase)
+DB_HOST = "aws-1-eu-central-1.pooler.supabase.com"
+DB_PORT = "6543"
+DB_DATABASE = "postgres"
+DB_USER = "postgres.momkjmjdcrohqonwqdtf"
+DB_PASSWORD = "kwikcallDB26@"
+DB_SSL = "true"
+
+# Queue (Note: localhost won't work in production)
+RABBITMQ_URL = "amqp://partcentralmq:partcentralmq160326@localhost:5672"
