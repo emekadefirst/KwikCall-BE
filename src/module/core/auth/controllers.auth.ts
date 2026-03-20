@@ -15,7 +15,7 @@ export const loginHandler = async (c: Context) => {
     const cookieOptions = {
         httpOnly: true,
         secure: true, 
-        sameSite: 'Strict' as const,
+        sameSite: 'None' as const,
         path: '/',
     };
 
@@ -47,7 +47,7 @@ export const refreshHandler = async (c: Context) => {
     const cookieOptions = {
         httpOnly: true,
         secure: true, 
-        sameSite: 'Strict' as const,
+        sameSite: 'None' as const,
         path: '/',
     };
 

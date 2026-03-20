@@ -3,16 +3,10 @@ import { Pool } from "@neondatabase/serverless";
 import { getDBURL } from "../configs/env.configs";
 import * as schema from "./models.core";
 
-let _dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
-
-const initDb = () => {
-  const url = getDBURL();
-  if (!url) {
-    throw new Error("Database connection failed: DB URL is empty. Ensure setGlobalEnv(env) was called.");
-  }
-
+// Create a fresh pool per request instead of sharing one across requests
+export const getDb = () => {
   const pool = new Pool({
-    connectionString: url,
+    connectionString: getDBURL(),
     max: 5,
     idleTimeoutMillis: 10000,
     connectionTimeoutMillis: 20000,
@@ -21,12 +15,11 @@ const initDb = () => {
   return drizzle(pool, { schema });
 };
 
+// Keep db export as a proxy that creates fresh instance per call
 export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
-  get(target, prop, receiver) {
-    if (!_dbInstance) {
-      _dbInstance = initDb();
-    }
-    const value = Reflect.get(_dbInstance, prop, receiver);
-    return typeof value === "function" ? value.bind(_dbInstance) : value;
-  },
+  get(_, prop, receiver) {
+    const instance = getDb();
+    const value = Reflect.get(instance, prop, receiver);
+    return typeof value === "function" ? value.bind(instance) : value;
+  }
 });
