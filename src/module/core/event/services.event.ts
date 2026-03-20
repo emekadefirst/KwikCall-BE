@@ -41,7 +41,7 @@ export class EventService {
 
     async update(id: string, userId: string, data: UpdateEventInput): Promise<EventObject> {
         // Fix for Error 3 & 5: Pass required pagination defaults to findOne
-        const existing = await this.repo.findOne(id);
+        const existing = await this.repo.findOne({id: id, hostId: userId});
 
         if (!existing) {
             throw new HTTPException(404, { message: "Event not found" });
@@ -58,7 +58,7 @@ export class EventService {
     }
 
     async delete(id: string, userId: string): Promise<boolean> {
-        const existing = await this.repo.findOne(id);
+        const existing = await this.repo.findOne({ id: id, hostId: userId});
 
         if (!existing) {
             throw new HTTPException(404, { message: "Event not found" });

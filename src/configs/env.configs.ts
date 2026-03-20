@@ -15,7 +15,7 @@ export const setGlobalEnv = (env: any) => {
  * 3. Fallback value
  */
 const getVar = (key: string, fallback: string = ''): string => {
-  return _cf_env?.[key] ?? Bun.env[key] ?? fallback;
+  return _cf_env?.[key] ?? process.env[key] ?? fallback;
 };
 
 // Database Config

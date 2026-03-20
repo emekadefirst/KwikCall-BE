@@ -28,7 +28,7 @@ SMTP_PASSWORD = "26V6imocs&"
 
 # Database (Supabase)
 DB_HOST = "aws-1-eu-central-1.pooler.supabase.com"
-DB_PORT = 5432
+DB_PORT = "6543"
 DB_DATABASE = "postgres"
 DB_USER = "postgres.momkjmjdcrohqonwqdtf"
 DB_PASSWORD = "kwikcallDB26@"
@@ -36,3 +36,6 @@ DB_SSL = "true"
 
 # Queue (Note: localhost won't work in production)
 RABBITMQ_URL = "amqp://partcentralmq:partcentralmq160326@localhost:5672"
+
+
+DATABASE_URL = "postgresql://postgres.momkjmjdcrohqonwqdtf:kwikcallDB26@@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require"

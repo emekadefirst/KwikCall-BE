@@ -4,7 +4,8 @@ import {
     CreateEventSchema, 
     UpdateEventSchema, 
     EventObjectSchema, 
-    EventPaginatedResponseSchema 
+    EventPaginatedResponseSchema,
+    ErrorSchema
 } from './schemas.event';
 
 const tags = ['Events'];
@@ -25,7 +26,8 @@ export const createEventRoute = createRoute({
     tags,
     request: { body: { content: { 'application/json': { schema: CreateEventSchema } } } },
     responses: {
-        201: { content: { 'application/json': { schema: EventObjectSchema } }, description: 'Event created' }
+        201: { content: { 'application/json': { schema: EventObjectSchema } }, description: 'Event created' },
+        401: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Unauthorized' }
     }
 });
 
@@ -39,6 +41,7 @@ export const updateEventRoute = createRoute({
     },
     responses: {
         200: { content: { 'application/json': { schema: EventObjectSchema } }, description: 'Event updated' },
+        401: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Unauthorized' },
         403: { description: 'Forbidden: Not the host' },
         404: { description: 'Event not found' }
     }

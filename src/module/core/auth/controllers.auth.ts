@@ -38,14 +38,25 @@ export const whoamiHandler = async (c: Context) => {
 
 export const refreshHandler = async (c: Context) => {
     // FIX: getCookie is the correct way to read cookies in Hono
-    const refreshToken = getCookie(c, 'refreshToken');
+    const token = getCookie(c, 'refreshToken');
     
-    if (!refreshToken) {
+    if (!token) {
         return c.json({ message: "No refresh token" }, 401);
     }
 
-    const user = await authService.refresh(refreshToken);
-    return c.json(user, 200);
+    const cookieOptions = {
+        httpOnly: true,
+        secure: true, 
+        sameSite: 'Strict' as const,
+        path: '/',
+    };
+
+    const { accessToken, refreshToken } = await authService.refresh(token);
+    
+    setCookie(c, 'accessToken', accessToken, { ...cookieOptions, maxAge: 60 * 15 });
+    setCookie(c, 'refreshToken', refreshToken, { ...cookieOptions, maxAge: 60 * 60 * 24 * 7 });
+    
+    return c.json(null, 200);
 };
 
 export const logoutHandler = async (c: Context) => {

@@ -6,6 +6,10 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 export const MeetingStatus = z.enum(["IDLE", "LIVE", "ENDED", "CANCELLED"]);
 export const EventType = z.enum(["INSTANT", "SCHEDULED", "RECURRING", "WEBINAR"]);
 
+export const ErrorSchema = z.object({
+    message: z.string()
+});
+
 
 export const EventQueryParamsSchema = z.object({
     id: z.string().uuid().optional().openapi({ 

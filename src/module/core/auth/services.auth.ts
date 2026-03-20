@@ -41,25 +41,42 @@ export class AuthService {
 
     async whoami(accessToken: string) {
         try {
-            const user = await JwtService.  getCurrentUser(accessToken);
-            if (!user) {
-                throw new  HTTPException(404, { message: "Account not found" });
+            const payload = await JwtService.verifyToken(accessToken, 'access');
+            if (!payload) {
+                throw new HTTPException(401, { message: "Unauthorized" });
             }
-            return user;
+
+            const { sub } = payload as { sub: string };
+            const result = await this.userRepository.fetch({ id: sub, page: 1, pageSize: 1 });
+
+            if (!result || result.data.length === 0) {
+                throw new HTTPException(404, { message: "Account not found" });
+            }
+
+            // Strip passwords from the results
+            const dataWithoutPasswords = result.data.map(({ password, ...userWithoutPassword }) => userWithoutPassword);
+
+            return {
+                ...result,
+                data: dataWithoutPasswords
+            };
+
         } catch (error) {
-            throw new  HTTPException(500, { message: `Unknow error:  ${error}` });
+            if (error instanceof HTTPException) throw error;
+            throw new HTTPException(500, { message: `Unknown error: ${error}` });
         }
     }
 
     async refresh(refreshToken: string) {
         try {
-            const user = await JwtService.refreshSession(refreshToken);
-            if (!user) {
-                throw new  HTTPException(404, { message: "Account not found" });
+            const tokens = await JwtService.refreshSession(refreshToken);
+            if (!tokens) {
+                throw new HTTPException(401, { message: "Invalid or expired refresh token" });
             }
-            return user;
+            return tokens;
         } catch (error) {
-            throw new  HTTPException(500, { message: `Unknow error:  ${error}` });
+            if (error instanceof HTTPException) throw error;
+            throw new HTTPException(500, { message: `Unknown error: ${error}` });
         }
     }
 }

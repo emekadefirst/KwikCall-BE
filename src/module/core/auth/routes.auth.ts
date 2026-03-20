@@ -46,7 +46,7 @@ export const refreshRoute = createRoute({
     responses: {
         200: { 
             description: 'Session refreshed',
-            content: { 'application/json': { schema: UserPaginatedResponseSchema } }
+            content: { 'application/json': { schema: z.null() } }
         },
         401: { description: 'Invalid or missing refresh token' }
     }

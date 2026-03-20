@@ -11,7 +11,7 @@ const service = new EventService();
 eventController.openapi(routes.listEventsRoute, async (c) => {
     const query = c.req.valid('query');
     const result = await service.fetch(query);
-    return c.json(result, 200);
+    return c.json(result as any, 200);
 });
 
 eventController.openapi(routes.createEventRoute, async (c) => {
@@ -25,7 +25,7 @@ eventController.openapi(routes.createEventRoute, async (c) => {
     const body = c.req.valid('json');
     const result = await service.create(body, hostId);
 
-    return c.json(result, 201);
+    return c.json(result as any, 201);
 });
 
 eventController.openapi(routes.updateEventRoute, async (c) => {
@@ -39,7 +39,7 @@ eventController.openapi(routes.updateEventRoute, async (c) => {
     const { id } = c.req.valid('param');
     const body = c.req.valid('json');
     const result = await service.update(id, hostId, body);
-    return c.json(result, 200);
+    return c.json(result as any, 200);
 });
 
 eventController.openapi(routes.deleteEventRoute, async (c) => {
